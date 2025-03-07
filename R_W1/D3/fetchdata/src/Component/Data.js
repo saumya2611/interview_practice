@@ -2,11 +2,19 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import Button from "./Button";
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { deleteData, fetchData } from "../Redux/action";
 
 const Data = () => {
-  const [fetchData, setFetchData] = useState([]);
-  const [filterData, setFilterData] = useState([]);
   const navigate = useNavigate();
+
+  const currentState = useSelector((state) => {
+    return state;
+  });
+
+  //   console.log("currentState-----------> Data file", currentState);
+
+  const dispatch = useDispatch();
 
   const goToUserProfile = (id) => {
     navigate(`/user/${id}`);
@@ -18,26 +26,17 @@ const Data = () => {
         `https://jsonplaceholder.typicode.com/posts`
       );
       //   console.log("fetchApi------->", );
-      setFetchData(fetchApi.data);
-      setFilterData(fetchApi.data);
+
+      dispatch(fetchData(fetchApi.data));
     } catch (error) {
       console.log("something went wrong");
     }
   }
 
-  const deleteData = (userId) => {
-    console.log("userId-------->", userId);
-    // console.log("filterData------->", filterData);
-
-    const deleteItem = filterData.filter((item) => {
-      return item.id != userId;
-    });
-    setFilterData(deleteItem);
-    console.log("deleteItem-------->", deleteItem);
-  };
-
   useEffect(() => {
-    data();
+    if (currentState.crudReducers.fetchData.length === 0) {
+      data();
+    }
   }, []);
   return (
     <div>
@@ -52,7 +51,7 @@ const Data = () => {
           </tr>
         </thead>
         <tbody>
-          {filterData.map((item) => {
+          {currentState.crudReducers.filterData.map((item) => {
             return (
               <tr key={item.id}>
                 <td className="p-[2rem] border border-slate-950"> {item.id}</td>
@@ -66,7 +65,7 @@ const Data = () => {
                   <Button
                     title={`Delete`}
                     className={`bg-red-500 hover:bg-red-400 px-5 py-2 rounded-sm text-white`}
-                    onClick={() => deleteData(item.id)}
+                    onClick={() => dispatch(deleteData(item.id))}
                   />
                 </td>
                 <td className="px-5  py-[1.5rem]  border border-slate-950 w-[400px]">
